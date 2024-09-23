@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<br>
+<br>
+<div class="container">
+    <div class="main-body">
+        <div class="row gutters-sm align-items-stretch">
+            <div class="col-md-4 mb-3 d-flex">
+                <div class="card w-100 h-100">
+                    <div class="card-body text-center">
+                        <img id="profileImage" src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Admin"
+                             class="rounded-circle profile-pic"
+                             onclick="document.getElementById('imageUpload').click();">
+                        <input type="file" id="imageUpload" name="profileImage" style="display: none;">
+                        <h4 id="displayName">John Doe</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8 mb-3 d-flex">
+                <div class="card w-100 h-100">
+                    <div class="card-body">
+                        <form id="profileForm" enctype="multipart/form-data">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Ad Soyad</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="fullName" name="fullName" class="form-control" maxlength="30"
+                                           pattern="[A-Za-z ]+" title="Only letters allowed" >
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Gmail</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="email" name="email" class="form-control">
+                                    <span id="emailError"
+                                          class="error-message d-none">Xahiş edirik gmail adresinizi yazın.</span>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Telefon</label>
+                                <div class="col-sm-9">
+                                    <input type="number" id="phone" name="phone" class="form-control">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Adres</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="mobile" name="mobile" class="form-control">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Göndər</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#imageUpload").change(function () {
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            $('#profileImage').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(this.files[0]);
+    });
+
+    $("#fullName").on("input", function () {
+        $("#displayName").text($(this).val());
+    });
+
+    function validateEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    $("#profileForm").submit(function (e) {
+        e.preventDefault();
+        let formData = new FormData(this);
+        let email = $("#email").val().trim();
+
+        if (!validateEmail(email)) {
+            toastr.error('Xahiş edirik gmail adresinizi yazın!');
+            $("#email").addClass('input-error');
+            $("#emailError").removeClass('d-none');
+            return;
+        } else {
+            $("#email").removeClass('input-error');
+            $("#emailError").addClass('d-none');
+        }
+
+        $.ajax({
+            url: 'save_email.php',
+            type: 'POST',
+            data: {email: email},
+            success: function (response) {
+                var result = JSON.parse(response);
+                if (result.status === 'success') {
+                    toastr.success(result.message, 'Uğurlu!');
+                    $('input[type="email"]').val('');
+                    $("#email").val('');
+                    $("#phone").val('');
+                    $("#mobile").val('');
+                } else {
+                    toastr.error(result.message, 'Xəta!');
+                }
+            },
+            error: function () {
+                toastr.error('Bir xəta baş verdi.', 'Xəta!');
+            }
+        });
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+
+</body>
+</html>
